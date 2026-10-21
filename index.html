@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>YAZAKI - AFRIQUIA GAZ TRACKER</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+background:#f5f7fa;
+font-family:Segoe UI;
+}
+
+.navbar{
+background:#003C8F;
+}
+
+.logo{
+height:60px;
+}
+
+.card{
+border:none;
+border-radius:15px;
+box-shadow:0px 4px 15px rgba(0,0,0,.1);
+}
+
+.kpi{
+font-size:32px;
+font-weight:bold;
+}
+
+.normal{
+color:#28a745;
+}
+
+.warning{
+color:#ffc107;
+}
+
+.critical{
+color:#dc3545;
+}
+
+.table{
+background:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark">
+<div class="container-fluid">
+
+<div>
+<img src="images/yazaki.png" class="logo">
+</div>
+
+<div>
+<h3 class="text-white">
+AFRIQUIA GAZ TRACKER
+</h3>
+</div>
+
+<div>
+<img src="images/afriquia.png" class="logo">
+</div>
+
+</div>
+</nav>
+
+<div class="container mt-4">
+
+<div class="row">
+
+<div class="col-md-3">
+<div class="card p-3">
+<h6>Niveau Actuel</h6>
+<div class="kpi critical" id="currentLevel">
+38%
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h6>Seuil Critique</h6>
+<div class="kpi">
+40%
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h6>Dernière Livraison</h6>
+<div class="kpi">
+12/10/2026
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h6>Autonomie</h6>
+<div class="kpi">
+18 Jours
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="row mt-4">
+
+<div class="col-md-8">
+
+<div class="card p-3">
+
+<h4>
+Evolution Niveau Cuve
+</h4>
+
+<canvas id="levelChart"></canvas>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card p-3">
+
+<h4>Alertes</h4>
+
+<div class="alert alert-danger">
+Niveau inférieur à 40%
+</div>
+
+<button
+class="btn btn-danger w-100"
+onclick="generateCommand()">
+
+Générer Commande
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mt-4">
+
+<div class="col-md-12">
+
+<div class="card p-4">
+
+<h4>Nouvelle Livraison</h4>
+
+<form>
+
+<div class="row">
+
+<div class="col-md-4">
+<label>N° Commande</label>
+<input type="text" class="form-control">
+</div>
+
+<div class="col-md-4">
+<label>Date Livraison</label>
+<input type="date" class="form-control">
+</div>
+
+<div class="col-md-4">
+
+<label>Reçu Par</label>
+
+<select class="form-control">
+
+<option>FATHI IDDAR</option>
+
+<option>DRIOUICH CHLIH</option>
+
+<option>FRAKECH MOHAMMED</option>
+
+<option>ABDELLATIF SABIR</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="row mt-3">
+
+<div class="col-md-3">
+<label>Gaz Planifié</label>
+<input type="number" id="planned" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Gaz Chargé</label>
+<input type="number" id="loaded" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Ecart</label>
+<input type="number" id="difference"
+class="form-control"
+readonly>
+</div>
+
+<div class="col-md-3">
+<label>Bon Livraison PDF</label>
+<input type="file"
+accept=".pdf"
+class="form-control">
+</div>
+
+</div>
+
+<div class="row mt-3">
+
+<div class="col-md-6">
+<label>Niveau Initial</label>
+<input type="number" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label>Niveau Final</label>
+<input type="number" class="form-control">
+</div>
+
+</div>
+
+<button
+type="button"
+class="btn btn-primary mt-3">
+
+Enregistrer Livraison
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mt-5">
+
+<div class="col-md-12">
+
+<div class="card p-4">
+
+<h4>Historique Livraisons</h4>
+
+<table class="table table-striped">
+
+<thead>
+
+<tr>
+
+<th>Commande</th>
+<th>Date</th>
+<th>Planifié</th>
+<th>Chargé</th>
+<th>Ecart</th>
+<th>Reçu Par</th>
+<th>PDF</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>CMD00125</td>
+<td>12/10/2026</td>
+<td>5000</td>
+<td>4950</td>
+<td>-50</td>
+<td>FATHI IDDAR</td>
+<td>
+<button class="btn btn-sm btn-success">
+PDF
+</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mt-4">
+
+<div class="col-md-12">
+
+<div class="card p-4">
+
+<h4>Suivi Technique Hebdomadaire</h4>
+
+<form class="row">
+
+<div class="col-md-3">
+<input type="text"
+placeholder="Nom"
+class="form-control">
+</div>
+
+<div class="col-md-3">
+<input type="text"
+placeholder="Prénom"
+class="form-control">
+</div>
+
+<div class="col-md-3">
+<input type="password"
+placeholder="Code Accès"
+class="form-control">
+</div>
+
+<div class="col-md-3">
+<input type="number"
+placeholder="Niveau Atteint (%)"
+class="form-control">
+</div>
+
+</form>
+
+<button class="btn btn-success mt-3">
+
+Valider Niveau
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+document.getElementById('loaded')
+.addEventListener('input',calculateDifference);
+
+document.getElementById('planned')
+.addEventListener('input',calculateDifference);
+
+function calculateDifference(){
+
+let planned =
+Number(document.getElementById('planned').value);
+
+let loaded =
+Number(document.getElementById('loaded').value);
+
+document.getElementById('difference').value =
+loaded-planned;
+
+}
+
+const ctx =
+document.getElementById('levelChart');
+
+new Chart(ctx,{
+
+type:'line',
+
+data:{
+
+labels:[
+'S1',
+'S2',
+'S3',
+'S4',
+'S5'
+],
+
+datasets:[{
+
+label:'Niveau Gaz %',
+
+data:[
+85,
+78,
+70,
+55,
+38
+],
+
+borderColor:'#003C8F',
+
+fill:false
+
+}]
+
+}
+
+});
+
+function generateCommand(){
+
+let body =
+`
+Bonjour,
+
+Suite à l'atteinte du seuil critique de 40%,
+
+Veuillez programmer une livraison de gaz.
+
+Site :
+YAZAKI Morocco Kenitra
+
+Cordialement
+`;
+
+window.location.href=
+"mailto:afriquiagaz@akwagroup.com?subject=Commande Gaz Yazaki&body="+encodeURIComponent(body);
+
+}
+
+</script>
+
+</body>
+</html>
